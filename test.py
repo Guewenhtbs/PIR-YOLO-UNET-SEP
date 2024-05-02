@@ -3,44 +3,44 @@ import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+def ReadVolumestoUnet(volume_file,seg_file) :
+    """
+    Read the volume and the segmentation of a MRI image and return the images in the format for the U-Net model.
+    Parameters:
+    volume_file: str
+        Path to the volume file.
+    seg_file: str
+        Path to the segmentation file.
+    Returns:
+    X: np.array
+        Array with the axial images.
+    y: np.array
+        Array with the segmentation images.
+    """
 
-flair = r'c:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii'
+    # Read the .nii image containing the volume with SimpleITK:
+    sitk_flair = sitk.ReadImage(volume_file)
+    sitk_flair_seg = sitk.ReadImage(seg_file)
 
-flair_seg = r'c:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii'
+    # and access the numpy array with a normalizer filter:
+    normalizer = sitk.NormalizeImageFilter()
+    n_flair = normalizer.Execute(sitk_flair)
+    ar_n_flair = sitk.GetArrayFromImage(n_flair)
 
-# Read the .nii image containing the volume with SimpleITK:
-sitk_flair = sitk.ReadImage(flair)
-sitk_flair_seg = sitk.ReadImage(flair_seg)
+    ar_flair_seg = sitk.GetArrayFromImage(sitk_flair_seg)
 
-# and access the numpy array:
-ar_flair = sitk.GetArrayFromImage(sitk_flair, type=np.float32)
-ar_flair_seg = sitk.GetArrayFromImage(sitk_flair_seg, type=np.float32)
+    # Slice on the axial plane all images who have a lesion:
+    X=[]
+    y=[]
+    for i in range(len(ar_flair_seg)) :
+        if ar_flair_seg[i,:,:].max() > 0 :
+            X.append(ar_n_flair[i,:,:])
+            y.append(ar_flair_seg[i,:,:])
+    X = np.asarray(X, dtype=np.float32)
+    X = np.expand_dims(X,-1)
+    y = np.asarray(y, dtype=np.float32)
+    y = tf.keras.utils.to_categorical(y)
 
-normalizer = sitk.NormalizeImageFilter()
+    return X,y
 
-n_flair = normalizer.Execute(sitk_flair)
 
-ar_n_flair = sitk.GetArrayFromImage(n_flair, type=np.float32)
-"""
-fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
-axes[0].imshow(ar_flair[9,:,:], cmap='gray')
-axes[0].set_title('Original Flair')
-
-axes[1].imshow(ar_n_flair[9,:,:], cmap='gray')
-axes[1].set_title('Normalized Flair')
-
-axes[2].imshow(ar_flair_seg[9,:,:], cmap='gray')
-axes[2].set_title('Flair Segmentation')
-
-plt.show()"""
-X=[]
-y=[]
-for i in range(23) :
-    if ar_flair_seg[i,:,:].max() > 0 :
-        X.append(ar_n_flair[i,:,:])
-        y.append(ar_flair_seg[i,:,:])
-X = np.asarray(X, dtype=np.float32)
-X = np.expand_dims(X,-1)
-y = np.asarray(y, dtype=np.float32)
-y = keras.utils.to_categorical(y)
