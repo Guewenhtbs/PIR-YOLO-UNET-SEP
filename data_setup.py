@@ -46,14 +46,19 @@ def ReadVolumestoUnet(volume_file,seg_file) :
 
 def ReadVolumestoYolo(volume_file,seg_file,save_path) :
     """
-    Read the volume and the segmentation of a MRI image and write file in the format for the YOLO model.
+    Read the volume and the segmentation of a MRI image and write files in the format for the YOLO model.
     Parameters:
     volume_file: str
         Path to the volume file.
     seg_file: str
         Path to the segmentation file.
+    save_path: str
+        Path to save the images and the segmentations in the YOLO format.
     """
+
+    # Extract the patient number from the path:
     patient_number = volume_file.split('Patient-')[1].split('\\')[0]
+
     # Read the .nii image containing the volume with SimpleITK:
     sitk_flair = sitk.ReadImage(volume_file)
     sitk_flair_seg = sitk.ReadImage(seg_file)
@@ -65,9 +70,11 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path) :
     # Slice on the axial plane all images who have a lesion:
     for i in range(len(ar_flair_seg)) :
         if ar_flair_seg[i,:,:].max() > 0 :
+
             # Write the image in the YOLO format
             image = Image.fromarray(((ar_flair[i,:,:]/ar_flair[i,:,:].max())* 255).astype(np.uint8))
             image.save(f"{save_path}Patient-{patient_number}_{i}.jpg")
+
             # Write the segmentation in the YOLO format:
             mask = (ar_flair_seg[i,:,:]> 0).astype('uint8') * 255
             contours,_ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -77,6 +84,7 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path) :
                     f.write(f"{i}")
                     for j in range(len(contour)) :
                         f.write(f" {contour[j]}")
+                    f.write("\n")
 
 
 ReadVolumestoYolo(r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\\')
