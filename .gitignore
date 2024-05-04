@@ -1,0 +1,6 @@
+segSep
+raw_data
+datasets
+runs
+yolov8n-seg.pt
+data.yaml

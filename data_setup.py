@@ -2,49 +2,12 @@ import numpy as np
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from pathlib import Path
 import cv2 as cv2
 from PIL import Image
 
-def ReadVolumestoUnet(volume_file,seg_file) :
-    """
-    Read the volume and the segmentation of a MRI image and return the images in the format for the U-Net model.
-    Parameters:
-    volume_file: str
-        Path to the volume file.
-    seg_file: str
-        Path to the segmentation file.
-    Returns:
-    X: np.array
-        Array with the axial images.
-    y: np.array
-        Array with the segmentation images.
-    """
-    # Read the .nii image containing the volume with SimpleITK:
-    sitk_flair = sitk.ReadImage(volume_file)
-    sitk_flair_seg = sitk.ReadImage(seg_file)
 
-    # and access the numpy array with a normalizer filter:
-    normalizer = sitk.NormalizeImageFilter()
-    n_flair = normalizer.Execute(sitk_flair)
-    ar_n_flair = sitk.GetArrayFromImage(n_flair)
-
-    ar_flair_seg = sitk.GetArrayFromImage(sitk_flair_seg)
-
-    # Slice on the axial plane all images who have a lesion:
-    X=[]
-    y=[]
-    for i in range(len(ar_flair_seg)) :
-        if ar_flair_seg[i,:,:].max() > 0 :
-            X.append(ar_n_flair[i,:,:])
-            y.append(ar_flair_seg[i,:,:])
-    X = np.asarray(X, dtype=np.float32)
-    X = np.expand_dims(X,-1)
-    y = np.asarray(y, dtype=np.float32)
-    y = tf.keras.utils.to_categorical(y)
-
-    return X,y
-
-def ReadVolumestoYolo(volume_file,seg_file,save_path) :
+def ReadVolumestoYolo(volume_file,seg_file,save_path,patient_number) :
     """
     Read the volume and the segmentation of a MRI image and write files in the format for the YOLO model.
     Parameters:
@@ -55,9 +18,11 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path) :
     save_path: str
         Path to save the images and the segmentations in the YOLO format.
     """
+    img_path = save_path / "images"
+    labels_path = save_path / "labels"
 
-    # Extract the patient number from the path:
-    patient_number = volume_file.split('Patient-')[1].split('\\')[0]
+    img_path.mkdir( parents=True, exist_ok=True )
+    labels_path.mkdir( parents=True, exist_ok=True )
 
     # Read the .nii image containing the volume with SimpleITK:
     sitk_flair = sitk.ReadImage(volume_file)
@@ -75,20 +40,55 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path) :
             # Write the segmentation in the YOLO format:
             mask = (ar_flair_seg[i,:,:]> 0).astype('uint8') * 255
             contours,_ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            with open(f"{save_path}Patient-{patient_number}-LesionSeg_{i}.txt", "w") as f:
+            with open(labels_path / f"img_{patient_number}{i}.txt", "w") as f:
                 for j in range(len(contours)) :
                     if contours[j].shape[0] > 2 :
                         segmented_values = True
                         contour = contours[j].flatten().tolist()
-                        f.write(f"{j}")
+                        f.write(f"{0}")
                         for k in range(len(contour)) :
-                            f.write(f" {contour[k]}")
+                            f.write(f" {contour[k]/256}")
                         f.write("\n")
 
             # Write the image in the YOLO format
             if segmented_values :
                 image = Image.fromarray(((ar_flair[i,:,:]/ar_flair[i,:,:].max())* 255).astype(np.uint8))
-                image.save(f"{save_path}Patient-{patient_number}_{i}.jpg")
+                image.save(img_path / f"img_{patient_number}{i}.png")
 
 
-ReadVolumestoYolo(r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\\')
+def GetPatientPath(n):
+    raw_data_path = Path("raw_data/Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information")
+    
+    return raw_data_path / f"Patient-{n}" / f"{n}-Flair.nii" , raw_data_path / f"Patient-{n}" / f"{n}-LesionSeg-Flair.nii"
+
+
+def GenDataYOLO(data_root_path,train_num,val_num,test_num) :
+    data_root_path = Path(data_root_path)
+
+    for i in range(1, train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "train",i) 
+        
+    for i in range(train_num, val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "val",i) 
+        
+    for i in range(val_num + train_num, test_num + val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "test",i) 
+
+
+GenDataYOLO("datasets",train_num=38,val_num=10,test_num=12)
+    
+yaml_content = f"""
+train: train/images
+val: val/images
+test: test/images
+
+names: ['lesions']
+    """
+    
+with Path('data.yaml').open('w') as f:
+    f.write(yaml_content)
+
+
