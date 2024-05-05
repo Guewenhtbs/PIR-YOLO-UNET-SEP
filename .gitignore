@@ -1,5 +1,5 @@
 segSep
-raw_data
+Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information
 datasets
 runs
 yolov8n-seg.pt

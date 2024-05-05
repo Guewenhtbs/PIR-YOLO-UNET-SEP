@@ -1,7 +1,7 @@
 import numpy as np
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
-import tensorflow as tf
+#import tensorflow as tf
 from pathlib import Path
 import cv2 as cv2
 from PIL import Image
@@ -57,7 +57,7 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path,patient_number) :
 
 
 def GetPatientPath(n):
-    raw_data_path = Path("raw_data/Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information")
+    raw_data_path = Path("Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information")
     
     return raw_data_path / f"Patient-{n}" / f"{n}-Flair.nii" , raw_data_path / f"Patient-{n}" / f"{n}-LesionSeg-Flair.nii"
 
