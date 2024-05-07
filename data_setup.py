@@ -2,6 +2,7 @@ import numpy as np
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from pathlib import Path
 import cv2 as cv2
 from PIL import Image
 
@@ -90,5 +91,41 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path) :
                 image = Image.fromarray(((ar_flair[i,:,:]/ar_flair[i,:,:].max())* 255).astype(np.uint8))
                 image.save(f"{save_path}Patient-{patient_number}_{i}.jpg")
 
+def GetPatientPath(n):
+    raw_data_path = Path("Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information")
+    
+    return raw_data_path / f"Patient-{n}" / f"{n}-Flair.nii" , raw_data_path / f"Patient-{n}" / f"{n}-LesionSeg-Flair.nii"
+
+
+def GenDataYOLO(data_root_path,train_num,val_num,test_num) :
+    data_root_path = Path(data_root_path)
+
+    for i in range(1, train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "train",i) 
+        
+    for i in range(train_num, val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "val",i) 
+        
+    for i in range(val_num + train_num, test_num + val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoYolo(flair,seg, data_root_path / "test",i)
+
 
 ReadVolumestoYolo(r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\\')
+
+def GenDataUnet(data_root_path,train_num,val_num,test_num) :
+    data_root_path = Path(data_root_path)
+
+    for i in range(1, train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoUnet(flair,seg) 
+        
+    for i in range(train_num, val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoUnet(flair,seg) 
+        
+    for i in range(val_num + train_num, test_num + val_num + train_num):
+        flair, seg = GetPatientPath(i)
+        ReadVolumestoUnet(flair,seg)
