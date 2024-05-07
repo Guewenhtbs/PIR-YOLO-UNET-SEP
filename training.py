@@ -6,7 +6,8 @@ model = YOLO("yolov8n-seg.pt")
 results = model.train(
         batch=8,
         device="cpu",
-        data= str(Path("data.yaml").resolve()),
-        epochs=7,
+        data= "data.yaml",
+        epochs=20,
         imgsz=256,
+        single_cls=True,
     )
