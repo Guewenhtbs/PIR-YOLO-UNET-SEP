@@ -31,9 +31,11 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path,patient_number) :
     """
     img_path = save_path / "images"
     labels_path = save_path / "labels"
+    seg_path = save_path / "segmentations"
 
     img_path.mkdir( parents=True, exist_ok=True )
     labels_path.mkdir( parents=True, exist_ok=True )
+    seg_path.mkdir( parents=True, exist_ok=True )
 
     # Read the .nii image containing the volume with SimpleITK:
     sitk_flair = sitk.ReadImage(volume_file, sitk.sitkFloat32)
@@ -82,6 +84,8 @@ def ReadVolumestoYolo(volume_file,seg_file,save_path,patient_number) :
                     ar_image = (((ar_flair[i,:,:]-ar_flair[:,:,:].min())/(ar_flair[:,:,:].max()-ar_flair[:,:,:].min()))* 255).astype(np.uint8)
                     image = Image.fromarray(ar_image)
                     image.save(img_path / f"img_{patient_number:02}{i:04}.png")
+                    seg = Image.fromarray(mask)
+                    seg.save(seg_path / f"img_{patient_number:02}{i:04}.png")
 
                     # plt.imshow(ar_image, cmap='gray')
                     # plt.imshow(mask, cmap='jet', alpha=0.5)
@@ -116,7 +120,7 @@ def GenDataYOLO(data_root_path,train_num,val_num,test_num) :
         ReadVolumestoYolo(flair,seg, data_root_path / "test",i) 
 
 
-GenDataYOLO("contour",train_num=38,val_num=10,test_num=12)
+GenDataYOLO("datasets",train_num=38,val_num=10,test_num=12)
     
 yaml_content = f"""
 train: train/images
