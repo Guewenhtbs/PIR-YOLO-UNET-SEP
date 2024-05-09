@@ -113,7 +113,7 @@ def GenDataYOLO(data_root_path,train_num,val_num,test_num) :
         ReadVolumestoYolo(flair,seg, data_root_path / "test",i)
 
 
-ReadVolumestoYolo(r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\\')
+#ReadVolumestoYolo(r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\Brain MRI Dataset of Multiple Sclerosis with Consensus Manual Lesion Segmentation and Patient Meta Information\Patient-1\1-LesionSeg-Flair.nii',r'C:\Users\kergu.LAPTOP-RGB94A60\Documents\TC\PIR\\')
 
 def GenDataUnet(data_root_path,train_num,val_num,test_num) :
     data_root_path = Path(data_root_path)
