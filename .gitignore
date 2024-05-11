@@ -6,3 +6,4 @@ yolov8n-seg.pt
 data.yaml
 0_Data_reg_inter_rigid 
 new_database
+new_Miccai
