@@ -1,13 +1,18 @@
-from ultralytics import YOLO #use pip install ultralytics==8.0.38
-from pathlib import Path
+#!pip install --upgrade ultralytics
+from ultralytics import YOLO
 
-model = YOLO("yolov8n-seg.pt")
+model1 = YOLO("yolov8n-seg.pt")
 
-results = model.train(
-        batch=8,
-        device="cpu",
-        data= "data.yaml",
-        epochs=20,
-        imgsz=256,
-        single_cls=True,
-    )
+results1= model1.train(
+            batch = 10,
+            device = 0,
+            data = "data1.yaml",
+            epochs = 200,
+            imgsz = 640,
+            cos_lr = True,
+            single_cls = True,
+            translate = 0.3,
+            degrees = 90,
+            flipud = 0.3,
+            scale = 0.8,
+)
