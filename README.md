@@ -24,5 +24,5 @@ Ce script permet de rescale et resampler les images en taille 512x512x30. Puis i
 
 ### YOLO
 Le fichier [training_yolo.py](training_yolo.py) contient la configuration d'entrainement utilisée pour notre YOLO.  
-Le fichier [dice_yolo.py](dice_yolo.py) contient le code permettant de mesurer les performence d'un modèle YOLO sur un jeu de donnée de test avec l'indice DICE.  
-Le fichier [disp_cont_yolo.py](disp_cont_yolo.py) permet d'aficher la segmentation d'une image produite par un modèle YOLO.
+Le fichier [dice_yolo.py](dice_yolo.py) contient le code permettant de mesurer les performances d'un modèle YOLO sur un jeu de données de test avec l'indice DICE.  
+Le fichier [disp_cont_yolo.py](disp_cont_yolo.py) permet d'afficher la segmentation d'une image produite par un modèle YOLO.
