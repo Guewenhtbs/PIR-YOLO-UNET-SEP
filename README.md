@@ -22,7 +22,7 @@ Nous avons tout d'abord retiré les cranes des images grâce au [projet_SIR](htt
 
 Ce script permet de rescale et resampler les images en taille 512x512x30. Puis il permet ensuite de normaliser les niveaux de gris avec le N4 Bias Field Corecction Filter, de garder seulement les coupes avec segmentation, de refaire l'échelle des niveaux de gris entre 0 et 255 sur les coupes, et enfin de les enregistrer au bon format.
 
-### YOLO
+## YOLO
 Le fichier [training_yolo.py](training_yolo.py) contient la configuration d'entrainement utilisée pour notre YOLO.  
 Le fichier [dice_yolo.py](dice_yolo.py) contient le code permettant de mesurer les performances d'un modèle YOLO sur un jeu de données de test avec l'indice DICE.  
 Le fichier [disp_cont_yolo.py](disp_cont_yolo.py) permet d'afficher la segmentation d'une image produite par un modèle YOLO.
